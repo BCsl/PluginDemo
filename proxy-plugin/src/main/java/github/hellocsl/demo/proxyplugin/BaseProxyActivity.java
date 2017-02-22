@@ -9,19 +9,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import github.hellocsl.demo.proxypluginlib.ProxyPluginActivity;
+
 /**
  * Created by chensuilun on 2017/2/21.
  */
-public class BaseProxyActivity extends AppCompatActivity {
+public class BaseProxyActivity extends AppCompatActivity implements ProxyPluginActivity {
     private final String TAG = this.getClass().getSimpleName();
 
     protected Activity that;  //指向真实启动的Activity
 
-    /**
-     * 将代理Activity传给插件Activity
-     *
-     * @param proxyActivity
-     */
+    @Override
     public void setProxy(Activity proxyActivity) {
         that = proxyActivity;
     }
@@ -99,5 +97,35 @@ public class BaseProxyActivity extends AppCompatActivity {
     @Override
     public Resources.Theme getTheme() {
         return that.getTheme() == null ? super.getTheme() : that.getTheme();
+    }
+
+    @Override
+    public void onPluginCreate(Bundle bundle) {
+        this.onCreate(bundle);
+    }
+
+    @Override
+    public void onPluginStart() {
+        this.onStart();
+    }
+
+    @Override
+    public void onPluginResume() {
+        this.onResume();
+    }
+
+    @Override
+    public void onPluginPause() {
+        this.onPause();
+    }
+
+    @Override
+    public void onPluginStop() {
+        this.onStop();
+    }
+
+    @Override
+    public void onPluginDestroy() {
+        this.onDestroy();
     }
 }

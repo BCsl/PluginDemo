@@ -1,1 +1,1 @@
-include ':app', ':proxy-plugin', ':hook-plugin'
+include ':app', ':proxy-plugin', ':hook-plugin', ':proxy-plugin-lib'

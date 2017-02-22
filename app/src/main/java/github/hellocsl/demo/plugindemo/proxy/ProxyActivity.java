@@ -16,6 +16,7 @@ import java.util.HashMap;
 
 import dalvik.system.DexClassLoader;
 import github.hellocsl.demo.plugindemo.BuildConfig;
+import github.hellocsl.demo.proxypluginlib.ProxyPluginActivity;
 
 /**
  * Created by chensuilun on 2017/2/21.
@@ -34,7 +35,7 @@ public class ProxyActivity extends Activity {
 
     private HashMap<String, Method> mActivityLifeCircleMethods = new HashMap<String, Method>();
 
-    private Object mRemoteActivity;
+    private ProxyPluginActivity mRemoteActivity;
 
     /**
      * @param context
@@ -168,15 +169,10 @@ public class ProxyActivity extends Activity {
             Class<?> localClass = getDexClassLoader().loadClass(mClass);
             Constructor<?> localConstructor = localClass.getConstructor();
             Object instance = localConstructor.newInstance();
-            mRemoteActivity = instance;
-            instantiateLifeCircleMethods(localClass);
-            //获取插件Activity的setProxy方法，这个方法是我们事先在插件中约定好的
-            Method setProxy = localClass.getMethod("setProxy", Activity.class);
-            setProxy.setAccessible(true);
-            //调用插件Activity的setProxy方法
-            setProxy.invoke(instance, this);//将ProxyActivity对象传给插件Activity，用于setContentView等等
-
-            performLifeCircle("onCreate", savedInstanceState);
+            //因为ClassLoader的父类委托机制，这里加载到的ProxyPluginActivity是和插件的同一个类
+            mRemoteActivity = (ProxyPluginActivity) instance;
+            mRemoteActivity.setProxy(this);
+            mRemoteActivity.onPluginCreate(savedInstanceState);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -185,31 +181,31 @@ public class ProxyActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        performLifeCircle("onStart");
+        mRemoteActivity.onPluginStart();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        performLifeCircle("onResume");
+        mRemoteActivity.onPluginResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        performLifeCircle("onPause");
+        mRemoteActivity.onPluginPause();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        performLifeCircle("onStop");
+        mRemoteActivity.onPluginStop();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        performLifeCircle("onDestroy");
+        mRemoteActivity.onPluginDestroy();
     }
 
     /**
